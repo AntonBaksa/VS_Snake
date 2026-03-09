@@ -1,9 +1,9 @@
 {
   "Version": 1,
-  "WorkspaceRootPath": "C:\\Users\\Anton.Baksa\\source\\repos\\Snake\\",
+  "WorkspaceRootPath": "C:\\Users\\Anton.Baksa\\Documents\\GitHub\\VS_Snake\\Snake\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{237D8586-0B66-40B8-BCD2-B84EAD12E067}|Snake\\Snake.vcxproj|C:\\Users\\Anton.Baksa\\source\\repos\\Snake\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
+      "AbsoluteMoniker": "D:0:0:{237D8586-0B66-40B8-BCD2-B84EAD12E067}|Snake\\Snake.vcxproj|C:\\Users\\Anton.Baksa\\Documents\\GitHub\\VS_Snake\\Snake\\main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}",
       "RelativeMoniker": "D:0:0:{237D8586-0B66-40B8-BCD2-B84EAD12E067}|Snake\\Snake.vcxproj|solutionrelative:main.cpp||{D0E1A5C6-B359-4E41-9B60-3365922C2A22}"
     }
   ],
@@ -20,11 +20,11 @@
               "$type": "Document",
               "DocumentIndex": 0,
               "Title": "main.cpp",
-              "DocumentMoniker": "C:\\Users\\Anton.Baksa\\source\\repos\\Snake\\main.cpp",
+              "DocumentMoniker": "C:\\Users\\Anton.Baksa\\Documents\\GitHub\\VS_Snake\\Snake\\main.cpp",
               "RelativeDocumentMoniker": "main.cpp",
-              "ToolTip": "C:\\Users\\Anton.Baksa\\source\\repos\\Snake\\main.cpp",
+              "ToolTip": "C:\\Users\\Anton.Baksa\\Documents\\GitHub\\VS_Snake\\Snake\\main.cpp",
               "RelativeToolTip": "main.cpp",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAAAAAAAAAAAA==",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000677|",
               "WhenOpened": "2026-03-05T14:48:22.954Z",
               "EditorCaption": ""
