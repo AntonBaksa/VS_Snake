@@ -22,6 +22,11 @@ bool ateFood = false;
 int points{ 0 };
 std::deque<Vec2> snake{ newHead };
 
+class Snake 
+{
+
+};
+
 enum GameStates
 {
 	mainMenu,
