@@ -24,7 +24,7 @@ std::deque<Vec2> snake{ newHead };
 
 class Snake 
 {
-
+public:
 };
 
 enum GameStates
