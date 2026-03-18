@@ -5,29 +5,76 @@
 #include <vector>
 #include <deque>
 
-const int height{ 10 };
-const int width{ 10 };
-
 struct Vec2
 {
 	int x;
 	int y;
 };
 
-Vec2 direction{ 1, 0 };
-
-Vec2 newHead{ 3,5 };
-Vec2 food{ 5, 7 };
-bool ateFood = false;
-int points{ 0 };
-std::deque<Vec2> snake{ newHead };
-
-class Snake 
+enum Direction : char
 {
-public:
+	up = 'w',
+	down = 's',
+	left = 'a',
+	right = 'd'
 };
 
-enum GameStates
+class Snake
+{
+	public:
+		Vec2 direction{ 1, 0 };
+		Vec2 newHead{ 3, 5 };
+		std::deque<Vec2> snakeBody{ newHead };
+		
+		void CheckSelfCollision()
+		{
+			if (snakeBody.size() > 2)
+			{
+				for (int i = 1; i < snakeBody.size(); i++)
+				{
+					if (snakeBody.front().x == snakeBody[i].x && snakeBody.front().y == snakeBody[i].y)
+					{
+						//Lose
+					}
+				}
+			}
+		}
+
+		void Move()
+		{
+			newHead.x = snakeBody.front().x + direction.x;
+			newHead.y = snakeBody.front().y + direction.y;
+
+			snakeBody.push_front(newHead);
+			
+			snakeBody.pop_back();
+			
+		}
+};
+
+class Food
+{
+	public:
+		Vec2 foodPos{ 5, 7 };
+
+		void NewFoodPos(int width, int height)
+		{
+
+			foodPos.x = rand() % width;
+			foodPos.y = rand() % height;
+
+			/*for (int i = 0; i < snake.size(); i++)
+			{
+				while (foodPos.x == snake[i].x && foodPos.y == snake[i].y)
+				{
+					foodPos.x = rand() % width;
+					foodPos.y = rand() % height;
+				}
+			}*/
+		}
+};
+
+enum GameState
 {
 	mainMenu,
 	howToPlay,
@@ -35,160 +82,140 @@ enum GameStates
 	gameOver,
 	quit
 };
-enum GameStates state{mainMenu};
+enum GameState state{mainMenu};
 
-void Reset()
+class Grid
 {
-	newHead = { 3,5 };
-	food = { 5, 7 };
-	ateFood = false;
-	points = { 0 };
-	snake = { newHead };
-	direction = { 1, 0 };
-}
+	public:
+		const int height{ 10 };
+		const int width{ 10 };	
+};
 
-void HandleInput(Vec2& direction)
+class Game
 {
-	if (_kbhit())
+private:
+	Snake snake;
+	Food food;
+	Grid grid;
+	bool ateFood = false;
+
+public:
+	int points{ 0 };
+
+	void HandleInput(Vec2& direction)
 	{
-		char key = _getch();
-
-		switch (key)
+		if (_kbhit())
 		{
-			case 'w':
-				if(direction.y != 1)
+			char key = _getch();
+
+			switch (key)
+			{
+			case up:
+				if (direction.y != 1)
 					direction = { 0, -1 };
 				break;
-			case 's':
+			case down:
 				if (direction.y != -1)
 					direction = { 0, 1 };
 				break;
-			case 'a':
+			case left:
 				if (direction.x != 1)
 					direction = { -1, 0 };
 				break;
-			case 'd':
+			case right:
 				if (direction.x != -1)
 					direction = { 1, 0 };
 				break;
 			default:
 				break;
 
-		}
-	}	
-}
-
-void Randomization()
-{
-
-	food.x = rand() % width;
-	food.y = rand() % height;
-
-	for (int i = 0; i < snake.size(); i++)
-	{
-		while (food.x == snake[i].x && food.y == snake[i].y)
-		{
-			food.x = rand() % width;
-			food.y = rand() % height;
-		}
-	}
-
-	ateFood = false;
-}
-
-void Collision()
-{
-	//colliding with snake
-	if (snake.size() > 2)
-	{
-		for (int i = 1; i < snake.size(); i++)
-		{
-			if (snake.front().x == snake[i].x && snake.front().y == snake[i].y)
-			{
-				state = gameOver;
 			}
 		}
 	}
-	
-	//colliding with food
-	if (newHead.x == food.x && newHead.y == food.y)
+
+	void Update()
 	{
-		ateFood = true;
-		points++;
-	}
+		snake.Move();
 
-	// colliding with walls
-	if (newHead.x < 0 || newHead.x > 9)
-	{
-		state = gameOver;
-	}
-	if (newHead.y < 0 || newHead.y > 9)
-	{
-		state = gameOver;
-	}
-}
-
-void Update()
-{
-
-	newHead.x = snake.front().x + direction.x;
-	newHead.y = snake.front().y + direction.y;
-
-	snake.push_front(newHead);
-
-	Collision();
-
-	if (!ateFood)
-	{
-		snake.pop_back();
-	}
-
-	if (ateFood)
-	{
-		Randomization();
-	}
-}
-
-void RenderGrid()
-{
-	std::cout << "Points:" << points << '\n';
-	for (int i = 0; i < width; i++)
-	{
-		for (int j = 0; j < height; j++)
+		//colliding with food
+		if (snake.newHead.x == food.foodPos.x && snake.newHead.y == food.foodPos.y)
 		{
-			bool isSnake = false;
-			for (int s = 0; s < snake.size(); s++)
+			ateFood = true;
+			points++;
+		}
+
+		// colliding with walls
+		if (snake.newHead.x < 0 || snake.newHead.x > 9)
+		{
+			//Lose
+		}
+		if (snake.newHead.y < 0 || snake.newHead.y > 9)
+		{
+			//Lose
+		}
+		snake.CheckSelfCollision();
+	}
+
+	void RenderGrid()
+	{
+		std::cout << "Points:" << points << '\n';
+		for (int i = 0; i < grid.width; i++)
+		{
+			for (int j = 0; j < grid.height; j++)
 			{
-				if (j == snake[s].x && i == snake[s].y)
+				bool isSnake = false;
+				for (int s = 0; s < snake.snakeBody.size(); s++)
 				{
-					isSnake = true;
-					break;
+					if (j == snake.snakeBody[s].x && i == snake.snakeBody[s].y)
+					{
+						isSnake = true;
+						break;
+					}
 				}
-			}
 
-			if (isSnake)
-			{
-				if (j == snake.front().x && i == snake.front().y)
+				if (isSnake)
 				{
-					std::cout << " 0";
+					if (j == snake.snakeBody.front().x && i == snake.snakeBody.front().y)
+					{
+						std::cout << " 0";
+					}
+					else
+					{
+						std::cout << " O";
+					}
+				}
+				else if (j == food.foodPos.x && i == food.foodPos.y)
+				{
+					std::cout << " #";
 				}
 				else
 				{
-					std::cout << " O";
+					std::cout << " .";
 				}
 			}
-			else if (j == food.x && i == food.y)
-			{
-				std::cout << " #";
-			}
-			else
-			{
-				std::cout << " .";
-			}
+			std::cout << '\n';
 		}
-		std::cout << '\n';
 	}
-}
+
+	void Reset()
+	{
+		snake.newHead = { 3,5 };
+		food = { 5, 7 };
+		ateFood = false;
+		points = { 0 };
+		snake.snakeBody = { snake.newHead };
+		snake.direction = { 1,0 };
+	}
+
+	void Run()
+	{
+		HandleInput(snake.direction);
+		Update();
+		RenderGrid();
+		std::this_thread::sleep_for(std::chrono::milliseconds(400));
+	}
+};
+Game game;
 
 void MainMenu()
 {
@@ -210,7 +237,7 @@ void MainMenu()
 	}
 	else if (input == 1)
 	{
-		Reset();
+		game.Reset();
 		
 		state = gameRunning;
 	}
@@ -234,7 +261,7 @@ void HowToPlay()
 	std::cout << "Press 1 or 2 to continue\n";
 	std::cout << "1. Back To Menu\n";
 	std::cout << "2. Quit\n\n";
-	std::cout << "----------Controles----------\n";
+	std::cout << "----------Controls----------\n";
 	std::cout << "Use WASD to move around\n";
 	std::cout << "W = up\n";
 	std::cout << "S = down\n";
@@ -273,7 +300,7 @@ void HowToPlay()
 	}
 }
 
-void GameOver()
+void GameOver(int points)
 {
 	std::cout << "========= Game Over! =========\n\n";
 	std::cout << "Points:" << points << "\n\n";
@@ -325,17 +352,14 @@ int main()
 
 			case gameRunning:
 				std::cout << "\033[2J\033[1;1H";
-				HandleInput(direction);
-				Update();
-				RenderGrid();
-				std::this_thread::sleep_for(std::chrono::milliseconds(800));
+				game.Run();
 				break;
 
 			case gameOver:
 				std::cout << "\033[2J\033[1;1H";
-				GameOver();
+				GameOver(game.points);
 				break;
-
+				
 			default:
 				break;
 		}
