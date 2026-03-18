@@ -57,7 +57,7 @@ class Food
 	public:
 		Vec2 foodPos{ 5, 7 };
 
-		void NewFoodPos(int width, int height)
+		void NewFoodPos(int width, int height, std::vector<Vec2> occupied)
 		{
 
 			foodPos.x = rand() % width;
@@ -142,6 +142,8 @@ public:
 		{
 			ateFood = true;
 			points++;
+			snake.snakeBody.push_back(snake.newHead);
+			food.NewFoodPos(10,10,snake.snakeBody);
 		}
 
 		// colliding with walls
