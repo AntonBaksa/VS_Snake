@@ -5,6 +5,8 @@
 #include <vector>
 #include <deque>
 
+bool isGameOver = false;
+
 struct Vec2
 {
 	int x;
@@ -35,6 +37,7 @@ class Snake
 					if (snakeBody.front().x == snakeBody[i].x && snakeBody.front().y == snakeBody[i].y)
 					{
 						//Lose
+						isGameOver = true;
 					}
 				}
 			}
@@ -45,10 +48,7 @@ class Snake
 			newHead.x = snakeBody.front().x + direction.x;
 			newHead.y = snakeBody.front().y + direction.y;
 
-			snakeBody.push_front(newHead);
-			
-			snakeBody.pop_back();
-			
+			snakeBody.push_front(newHead);			
 		}
 };
 
@@ -57,20 +57,10 @@ class Food
 	public:
 		Vec2 foodPos{ 5, 7 };
 
-		void NewFoodPos(int width, int height, std::vector<Vec2> occupied)
+		void NewFoodPos(int width, int height)
 		{
-
 			foodPos.x = rand() % width;
-			foodPos.y = rand() % height;
-
-			/*for (int i = 0; i < snake.size(); i++)
-			{
-				while (foodPos.x == snake[i].x && foodPos.y == snake[i].y)
-				{
-					foodPos.x = rand() % width;
-					foodPos.y = rand() % height;
-				}
-			}*/
+			foodPos.y = rand() % height;	
 		}
 };
 
@@ -84,11 +74,10 @@ enum GameState
 };
 enum GameState state{mainMenu};
 
-class Grid
+struct Grid
 {
-	public:
-		const int height{ 10 };
-		const int width{ 10 };	
+	const int height{ 10 };
+	const int width{ 10 };	
 };
 
 class Game
@@ -98,33 +87,40 @@ private:
 	Food food;
 	Grid grid;
 	bool ateFood = false;
+	bool canChangeDirection = true;
 
 public:
 	int points{ 0 };
 
-	void HandleInput(Vec2& direction)
+	void HandleInput()
 	{
-		if (_kbhit())
+		if (_kbhit() && canChangeDirection)
 		{
 			char key = _getch();
+			canChangeDirection = false;
+			
+			while (_kbhit())
+			{
+				(void)_getch();
+			}
 
 			switch (key)
 			{
 			case up:
-				if (direction.y != 1)
-					direction = { 0, -1 };
+				if (snake.direction.y != 1)
+					snake.direction = { 0, -1 };
 				break;
 			case down:
-				if (direction.y != -1)
-					direction = { 0, 1 };
+				if (snake.direction.y != -1)
+					snake.direction = { 0, 1 };
 				break;
 			case left:
-				if (direction.x != 1)
-					direction = { -1, 0 };
+				if (snake.direction.x != 1)
+					snake.direction = { -1, 0 };
 				break;
 			case right:
-				if (direction.x != -1)
-					direction = { 1, 0 };
+				if (snake.direction.x != -1)
+					snake.direction = { 1, 0 };
 				break;
 			default:
 				break;
@@ -135,6 +131,8 @@ public:
 
 	void Update()
 	{
+		ateFood = false;
+		bool invalidCell = true;
 		snake.Move();
 
 		//colliding with food
@@ -142,20 +140,45 @@ public:
 		{
 			ateFood = true;
 			points++;
-			snake.snakeBody.push_back(snake.newHead);
-			food.NewFoodPos(10,10,snake.snakeBody);
+
+			//keep find new position for food untill on empty cell
+			while (invalidCell)
+			{
+				food.NewFoodPos(grid.width, grid.height);
+				invalidCell = false;
+
+				for (int i = 0; i < snake.snakeBody.size(); i++)
+				{
+					if (food.foodPos.x == snake.snakeBody[i].x && food.foodPos.y == snake.snakeBody[i].y)
+					{
+						invalidCell = true;
+						break;
+					}
+				}
+			}
+		}
+
+		if(!ateFood)
+		{
+			snake.snakeBody.pop_back();
 		}
 
 		// colliding with walls
 		if (snake.newHead.x < 0 || snake.newHead.x > 9)
 		{
 			//Lose
+			isGameOver = true;
 		}
 		if (snake.newHead.y < 0 || snake.newHead.y > 9)
 		{
 			//Lose
+			isGameOver = true;
 		}
 		snake.CheckSelfCollision();
+		if (isGameOver)
+		{
+			state = gameOver;
+		}
 	}
 
 	void RenderGrid()
@@ -207,14 +230,16 @@ public:
 		points = { 0 };
 		snake.snakeBody = { snake.newHead };
 		snake.direction = { 1,0 };
+		isGameOver = false;
 	}
 
 	void Run()
 	{
-		HandleInput(snake.direction);
+		canChangeDirection = true;
+		HandleInput();
 		Update();
 		RenderGrid();
-		std::this_thread::sleep_for(std::chrono::milliseconds(400));
+		std::this_thread::sleep_for(std::chrono::milliseconds(800));
 	}
 };
 Game game;
