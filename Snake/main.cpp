@@ -5,8 +5,6 @@
 #include <vector>
 #include <deque>
 
-bool isGameOver = false;
-
 struct Vec2
 {
 	int x;
@@ -23,56 +21,47 @@ enum Direction : char
 
 class Snake
 {
-	public:
-		Vec2 direction{ 1, 0 };
-		Vec2 newHead{ 3, 5 };
-		std::deque<Vec2> snakeBody{ newHead };
+public:
+	Vec2 direction{ 1, 0 };
+	Vec2 newHead{ 3, 5 };
+	std::deque<Vec2> snakeBody{ newHead };
 		
-		void CheckSelfCollision()
+	bool CheckSelfCollision()
+	{
+		if (snakeBody.size() > 2)
 		{
-			if (snakeBody.size() > 2)
+			for (int i = 1; i < snakeBody.size(); i++)
 			{
-				for (int i = 1; i < snakeBody.size(); i++)
+				if (snakeBody.front().x == snakeBody[i].x && snakeBody.front().y == snakeBody[i].y)
 				{
-					if (snakeBody.front().x == snakeBody[i].x && snakeBody.front().y == snakeBody[i].y)
-					{
-						//Lose
-						isGameOver = true;
-					}
+					//Lose
+					return true;
 				}
 			}
 		}
+		return false;
+	}
 
-		void Move()
-		{
-			newHead.x = snakeBody.front().x + direction.x;
-			newHead.y = snakeBody.front().y + direction.y;
+	void Move()
+	{
+		newHead.x = snakeBody.front().x + direction.x;
+		newHead.y = snakeBody.front().y + direction.y;
 
-			snakeBody.push_front(newHead);			
-		}
+		snakeBody.push_front(newHead);			
+	}
 };
 
 class Food
 {
-	public:
-		Vec2 foodPos{ 5, 7 };
+public:
+	Vec2 foodPos{ 5, 7 };
 
-		void NewFoodPos(int width, int height)
-		{
-			foodPos.x = rand() % width;
-			foodPos.y = rand() % height;	
-		}
+	void NewFoodPos(int width, int height)
+	{
+		foodPos.x = rand() % width;
+		foodPos.y = rand() % height;	
+	}
 };
-
-enum GameState
-{
-	mainMenu,
-	howToPlay,
-	gameRunning,
-	gameOver,
-	quit
-};
-enum GameState state{mainMenu};
 
 struct Grid
 {
@@ -82,15 +71,23 @@ struct Grid
 
 class Game
 {
-private:
+
 	Snake snake;
 	Food food;
 	Grid grid;
 	bool ateFood = false;
 	bool canChangeDirection = true;
+	int points = 0;
 
-public:
-	int points{ 0 };
+	enum GameState
+	{
+		mainMenu,
+		howToPlay,
+		gameRunning,
+		gameOver,
+		quit
+	};
+	enum GameState state { mainMenu };
 
 	void HandleInput()
 	{
@@ -167,15 +164,16 @@ public:
 		if (snake.newHead.x < 0 || snake.newHead.x > 9)
 		{
 			//Lose
-			isGameOver = true;
+			state = gameOver;
 		}
 		if (snake.newHead.y < 0 || snake.newHead.y > 9)
 		{
 			//Lose
-			isGameOver = true;
+			state = gameOver;
 		}
-		snake.CheckSelfCollision();
-		if (isGameOver)
+
+		//check if colliding with itself
+		if (snake.CheckSelfCollision())
 		{
 			state = gameOver;
 		}
@@ -230,7 +228,6 @@ public:
 		points = { 0 };
 		snake.snakeBody = { snake.newHead };
 		snake.direction = { 1,0 };
-		isGameOver = false;
 	}
 
 	void Run()
@@ -241,154 +238,156 @@ public:
 		RenderGrid();
 		std::this_thread::sleep_for(std::chrono::milliseconds(800));
 	}
+
+	void MainMenu()
+	{
+		std::cout << "=========== Snake ===========\n";
+		std::cout << "Press 1,2 or 3 to continue\n";
+		std::cout << "1. Play\n";
+		std::cout << "2. How To Play\n";
+		std::cout << "3. Quit\n";
+		std::cout << "=============================\n";
+
+		int input{};
+		std::cin >> input;
+
+		if (std::cin.fail())
+		{
+			std::cout << "Invalid Input!\n";
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+		else if (input == 1)
+		{
+			Reset();
+
+			state = gameRunning;
+		}
+		else if (input == 2)
+		{
+			state = howToPlay;
+		}
+		else if (input == 3)
+		{
+			state = quit;
+		}
+		else
+		{
+			std::cout << "Must enter number 1, 2 or 3!\n";
+		}
+	}
+
+	void HowToPlay()
+	{
+		std::cout << "======== How To Play ========\n";
+		std::cout << "Press 1 or 2 to continue\n";
+		std::cout << "1. Back To Menu\n";
+		std::cout << "2. Quit\n\n";
+		std::cout << "----------Controls----------\n";
+		std::cout << "Use WASD to move around\n";
+		std::cout << "W = up\n";
+		std::cout << "S = down\n";
+		std::cout << "D = right\n";
+		std::cout << "A = left\n";
+		std::cout << "-------------Goal------------\n";
+		std::cout << "Move to # to eat and make \n";
+		std::cout << "the snake longer\n";
+		std::cout << "Eat as many # without losing\n";
+		std::cout << "------------Losing-----------\n";
+		std::cout << "You lose if:\n";
+		std::cout << " * You go outside the grid\n";
+		std::cout << " * Snake collides with itself\n";
+		std::cout << "=============================\n";
+
+		int input{};
+		std::cin >> input;
+
+		if (std::cin.fail())
+		{
+			std::cout << "Invalid Input!\n";
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+		else if (input == 1)
+		{
+			state = mainMenu;
+		}
+		else if (input == 2)
+		{
+			state = quit;
+		}
+		else
+		{
+			std::cout << "Must enter number 1 or 2!\n";
+		}
+	}
+
+	void GameOver(int points)
+	{
+		std::cout << "========= Game Over! =========\n\n";
+		std::cout << "Points:" << points << "\n\n";
+		std::cout << "Press 1 or 2 to continue\n";
+		std::cout << "1. Back To Menu\n";
+		std::cout << "2. Quit\n";
+		std::cout << "=============================\n";
+
+		int input{};
+		std::cin >> input;
+
+		if (std::cin.fail())
+		{
+			std::cout << "Invalid Input!\n";
+			std::cin.clear();
+			std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+		}
+		else if (input == 1)
+		{
+			state = mainMenu;
+		}
+		else if (input == 2)
+		{
+			state = quit;
+		}
+		else
+		{
+			std::cout << "Must enter number 1 or 2!\n";
+		}
+	}
+public:
+
+	void Start()
+	{
+		while (state != quit)
+		{
+			std::cout << "\033[2J\033[1;1H";
+
+			switch (state)
+			{
+			case mainMenu:
+				MainMenu();
+				break;
+
+			case howToPlay:
+				HowToPlay();
+				break;
+
+			case gameRunning:
+
+				Run();
+				break;
+
+			case gameOver:
+				GameOver(points);
+				break;
+			}
+		}
+	}
 };
-Game game;
-
-void MainMenu()
-{
-	std::cout << "=========== Snake ===========\n";
-	std::cout << "Press 1,2 or 3 to continue\n";
-	std::cout << "1. Play\n";
-	std::cout << "2. How To Play\n";
-	std::cout << "3. Quit\n";
-	std::cout << "=============================\n";
-
-	int input{};
-	std::cin >> input;
-
-	if (std::cin.fail())
-	{
-		std::cout << "Invalid Input!\n";
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	else if (input == 1)
-	{
-		game.Reset();
-		
-		state = gameRunning;
-	}
-	else if (input == 2)
-	{
-		state = howToPlay;
-	}
-	else if (input == 3)
-	{
-		state = quit;
-	}
-	else
-	{
-		std::cout << "Must enter number 1, 2 or 3!\n";
-	}
-}
-
-void HowToPlay()
-{
-	std::cout << "======== How To Play ========\n";
-	std::cout << "Press 1 or 2 to continue\n";
-	std::cout << "1. Back To Menu\n";
-	std::cout << "2. Quit\n\n";
-	std::cout << "----------Controls----------\n";
-	std::cout << "Use WASD to move around\n";
-	std::cout << "W = up\n";
-	std::cout << "S = down\n";
-	std::cout << "D = right\n";
-	std::cout << "A = left\n";
-	std::cout << "-------------Goal------------\n";
-	std::cout << "Move to # to eat and make \n";
-	std::cout << "the snake longer\n";
-	std::cout << "Eat as many # without losing\n";
-	std::cout << "------------Losing-----------\n";
-	std::cout << "You lose if:\n";
-	std::cout << " * You go outside the grid\n";
-	std::cout << " * Collide with with yourself\n";
-	std::cout << "=============================\n";
-
-	int input{};
-	std::cin >> input;
-
-	if (std::cin.fail())
-	{
-		std::cout << "Invalid Input!\n";
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	else if (input == 1)
-	{
-		state = mainMenu;
-	}
-	else if (input == 2)
-	{
-		state = quit;
-	}
-	else
-	{
-		std::cout << "Must enter number 1 or 2!\n";
-	}
-}
-
-void GameOver(int points)
-{
-	std::cout << "========= Game Over! =========\n\n";
-	std::cout << "Points:" << points << "\n\n";
-	std::cout << "Press 1 or 2 to continue\n";
-	std::cout << "1. Back To Menu\n";
-	std::cout << "2. Quit\n";
-	std::cout << "=============================\n";
-
-	int input{};
-	std::cin >> input;
-
-	if (std::cin.fail())
-	{
-		std::cout << "Invalid Input!\n";
-		std::cin.clear();
-		std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-	}
-	else if(input == 1)
-	{
-		state = mainMenu;
-	}
-	else if (input == 2)
-	{
-		state = quit;
-	}
-	else
-	{
-		std::cout << "Must enter number 1 or 2!\n";
-	}
-}
 
 int main() 
 {
 	srand(time(NULL));
 
-	while (state != quit)
-	{
-		switch (state)
-		{
-			case mainMenu:
-				std::cout << "\033[2J\033[1;1H";
-				MainMenu();
-				break;
-
-			case howToPlay:
-				std::cout << "\033[2J\033[1;1H";
-				HowToPlay();
-				break;
-
-			case gameRunning:
-				std::cout << "\033[2J\033[1;1H";
-				game.Run();
-				break;
-
-			case gameOver:
-				std::cout << "\033[2J\033[1;1H";
-				GameOver(game.points);
-				break;
-				
-			default:
-				break;
-		}
-	}
+	Game game;
+	game.Start();
 }
