@@ -1,12 +1,5 @@
 #pragma once
 
-#include <iostream>
-#include <conio.h>
-#include <thread>
-#include <chrono>
-#include <vector>
-#include <deque>
-#include "Vec2.h"
 #include "Snake.h"
 #include "Food.h"
 #include "Grid.h"
