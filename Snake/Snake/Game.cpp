@@ -153,7 +153,7 @@ void Game::Run()
 	HandleInput();
 	Update();
 	RenderGrid();
-	std::this_thread::sleep_for(std::chrono::milliseconds(800));
+	std::this_thread::sleep_for(std::chrono::milliseconds(300));
 }
 
 void Game::MainMenu()
