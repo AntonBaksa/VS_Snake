@@ -6,5 +6,5 @@ class Food
 public:
 	Vec2 foodPos{ 5, 7 };
 
-	void NewFoodPos(int width, int height);
+	void NewFoodPos(const int width, const int height);
 };

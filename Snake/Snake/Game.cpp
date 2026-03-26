@@ -139,12 +139,10 @@ void Game::RenderGrid()
 
 void Game::Reset()
 {
-	snake.newHead = { 3,5 };
 	food = { 5, 7 };
 	ateFood = false;
 	points = { 0 };
-	snake.snakeBody = { snake.newHead };
-	snake.direction = { 1,0 };
+	snake.Reset();
 }
 
 void Game::Run()
@@ -270,7 +268,6 @@ void Game::GameOver(int points)
 		std::cout << "Must enter number 1 or 2!\n";
 	}
 }
-
 
 void Game::Start()
 {

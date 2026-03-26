@@ -11,6 +11,8 @@ public:
 
 	bool CheckSelfCollision();
 	
+	void Reset();
+
 	void Move();
 	
 };

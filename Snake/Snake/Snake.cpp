@@ -24,3 +24,10 @@ void Snake::Move()
 
 	snakeBody.push_front(newHead);
 }
+
+void Snake::Reset()
+{
+	newHead = { 3,5 };
+	snakeBody = { newHead };
+	direction = { 1,0 };
+}
